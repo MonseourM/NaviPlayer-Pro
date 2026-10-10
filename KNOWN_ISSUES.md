@@ -1,79 +1,170 @@
 # NaviPlayer Pro — Known Issues
 
-A running list of known bugs, quirks, and limitations.
+**Applies to: v12.16.1**
 
-> **Scope:** NaviPlayer Pro ships as `index.html` + `app.js` + `styles.css` (or one bundled `NaviPlayer_Pro_Portable.html`). `app.js` is a long chain of ~70 self-contained feature patches layered on top of each other, so line numbers move around. Most "issues" below are environmental or design limits rather than crashes.
+This document records accepted limitations and environment-dependent behavior in the modular NaviPlayer Pro release. It is not a list of resolved historical bugs from the former monolithic Pro branch.
 
----
+### Edition support notice
 
-## High priority / most likely to confuse a new user
+**NaviPlayer Pro Portable is discontinued.** Portable v6 is the final archived Portable build and receives no updates, compatibility fixes, new features, documentation parity, or support guarantees. The modular source is the only maintained edition. Portable-specific behavior is not a current modular-build defect.
 
-### 1. Your media files are never saved — only your data
-This is the big one to understand. Browsers do **not** allow a web app to permanently store actual audio/video files. NaviPlayer saves everything *about* your library (playlists, likes, metadata edits, lyrics, play counts, settings, wallpaper), but **not the files themselves**.
+## High priority user notes
 
-- **What this means:** after a reload, or on a new device, you must **re-add your music files**. Everything then relinks automatically by filename.
-- **Backup:** use **Export EVERYTHING** regularly. It saves all your data in one JSON. On another device, import it, re-add the same files, and it all reconnects.
-- This is a hard browser limitation, not a bug — but it surprises people, so it's #1.
+### 1. Back up browser data
 
-### 2. Some features need the internet
-**Lyrics**, **album art**, and **auto-tagging** fetch from free community services (LRCLIB, MusicBrainz, Cover Art Archive). They require a connection and only work as well as your file tags. Niche, mistagged, or very new tracks may return nothing. Everything else works fully offline.
+NaviPlayer stores playlists, likes, layouts, metadata overrides, lyrics, captions, watch state, listening history, wallpaper, and related application data in browser storage. Clearing site data, switching origins, changing browser profiles, or using private browsing can make that data unavailable.
 
-### 3. Some features need a real browser tab (not an embed/preview)
-**Picture-in-Picture (audio mini-player)**, **video fullscreen**, and a few others use modern browser APIs that are **blocked inside sandboxed iframes** (like online code-editor previews). They work when you open the actual `.html` in its own browser tab. If a button "does nothing," try it in a real tab first.
+Use **Data & Maintenance → Export Backup** before major updates or storage cleanup.
 
----
+### 2. Media files are not copied into NaviPlayer
 
-## Medium (browser / environment dependent)
+Ordinary local audio and video files stay in their original folders. NaviPlayer stores stable references and application data about them, not a duplicate of the entire Library.
 
-### 4. Best in Chromium browsers
-The audio **Picture-in-Picture mini-player** uses the Document Picture-in-Picture API, which is currently **Chromium-only** (Chrome, Edge, Brave, Vivaldi). Firefox/Safari get a graceful fallback message. Video PiP and everything else work broadly.
+Persistent folder access can reconnect media after reload where the File System Access API and browser permissions allow. In unsupported or restricted environments, files must be selected again.
 
-### 5. Large library performance
-The library handles thousands of tracks, but on very large libraries (several thousand+), first-time waveform analysis, bulk lyric/art fetching, and initial import can be slow. Bulk online fetches are deliberately throttled to be polite to the free APIs (~1 request/second for MusicBrainz).
+### 3. Embedded previews can block advanced browser APIs
 
-### 6. The file itself is large
-The bundled single file is ~870 KB of HTML+CSS+JS. Some lightweight web-based code editors struggle to *edit* a file that big (the browser runs it fine). If your editor chokes, use the **split** version (`index.html` / `app.js` / `styles.css`) — each is a clean single-language file that tools handle far better.
+Sandboxed editor previews may block or restrict:
 
----
+- Persistent folder access
+- Writable M3U/M3U8 files
+- Audio Document Picture-in-Picture
+- Video Picture-in-Picture
+- Fullscreen
+- Clipboard operations
+- File conversion workers
 
-## Low priority / cosmetic / edge cases
+Test permission-dependent features in a normal secure browser tab before reporting them as application defects.
 
-### 7. localStorage size limits
-All your data lives in `localStorage`, which is capped around ~5 MB in most browsers. A **very** large library with lots of lyrics and metadata could theoretically hit that ceiling. In practice most users won't, but it's why huge wallpapers may occasionally fail to save.
+## Browser and codec limitations
 
-### 8. Duplicate finder is filename+size based
-The Duplicate Finder matches by filename and file size. It reliably catches true duplicates but intentionally won't flag the *same song in a different format/bitrate* (different size), to avoid false positives.
+### 4. Native playback depends on Chromium and installed codecs
 
-### 9. Crossfade isn't true simultaneous overlap
-Crossfade is a fade-out-then-into-next effect, not two tracks overlapping through a shared audio graph (that would conflict with the equalizer's audio tap). It's smooth for everyday use but not a DJ-grade beatmatched crossfade.
+NaviPlayer uses the browser’s native media engine. A recognized file extension does not guarantee that the browser can decode the file’s container, video codec, or audio codec.
 
-### 10. A few dialogs are still native browser popups
-Most dialogs are in-app and themed, but a couple of rare/edge actions (the Auto-tag confirmation and Smart-playlist delete) still use the browser's built-in `confirm()`. They work fine; they just look like your browser, not like NaviPlayer.
+Library Health & Compatibility reports suspicious or unsupported media where possible. The current release does not bundle an FFmpeg conversion runtime, so **Convert for Browser Playback** is not available until a compatible runtime and adapter are supplied.
 
----
+### 5. Audio Picture-in-Picture is not universally available
 
-## Architecture notes
+Audio Picture-in-Picture uses the Document Picture-in-Picture API. Browser support, secure-context requirements, and iframe permissions determine availability. NaviPlayer reports a refusal rather than opening a fake mini-player.
 
-If you plan to hack on this, a few heads-ups:
+### 6. Remote streams may restrict analysis and artwork
 
-- **`app.js` is ~70 stacked IIFE "patches."** Each version (V13, V14, … V71) is a self-contained module that layers behavior on top of the previous ones, often re-wrapping functions like `renderAll`. This made rapid iteration possible but means behavior for a single feature can span several patches.
-- **`styles.css` has many late-stage `!important` overrides** from responsive/polish work. Specificity battles are, sadly, real here.
-- **Visibility of the viewer's waveform/lyrics/focus modes** is centralized in one controller (the latest `naviPlayer` viewer patch) that sets inline styles as the single source of truth — please route changes through it rather than adding competing CSS, or you'll reintroduce the flicker/override bugs that were painstakingly removed.
-- The most valuable contribution would be a **consolidation pass**: collapsing the patch chain into clean modules and pulling the JS-injected CSS into `styles.css`. It's feature-first code; it would benefit enormously from an architecture-first cleanup.
+Cross-origin restrictions can prevent waveform decoding, generated thumbnails, canvas extraction, or detailed capability inspection for remote streams. Playback may still work even when these secondary features do not.
 
----
+## Performance and scale
 
-## Quick triage summary
+### 7. Very large libraries require progressive work
 
-| # | Issue | Type | Breaks app? |
-|---|---|---|---|
-| 1 | Media files not stored (re-add on reload) | Browser limit | No (by design) |
-| 2 | Lyrics/art/tagging need internet | Design | No |
-| 3 | PiP/fullscreen blocked in iframes | Browser limit | No |
-| 4 | Audio PiP is Chromium-only | Browser support | No |
-| 5 | Large-library performance | Performance | No |
-| 6 | Big file hard to *edit* (use split) | Tooling | No |
-| 7 | localStorage ~5 MB cap | Storage | Rare |
-| 8 | Dupe finder = name+size | Design | No |
-| 9 | Crossfade not true overlap | Design | No |
-| 10 | A couple native `confirm()` dialogs | Cosmetic | No |
+NaviPlayer is designed for libraries containing thousands of items, but first-time indexing, metadata parsing, waveform decoding, thumbnail extraction, bulk lyric fetching, Health scans, and deep cache scans can still be expensive.
+
+Video thumbnails are generated progressively with bounded concurrency. Deep cache accounting is optional because exact serialization of large IndexedDB stores can temporarily burden the preview.
+
+### 8. Icons mode is incremental
+
+Large Icons views append content in chunks rather than creating every card at once. This protects responsiveness and memory. Cards continue loading while the view remains open.
+
+### 9. Browser zoom and unusual pane widths
+
+Workspace layouts are designed around actual pane width, but extreme browser zoom, forced workspace modes at impractical widths, or unusually large Context widths can still produce truncation or horizontal scrolling. Automatic mode is the safest default.
+
+## Storage
+
+### 10. Storage is shared by origin
+
+Some code previews commonly share one web origin across projects. NaviPlayer Diagnostics reports NaviPlayer records separately, but browser-reported total origin usage can include other projects, cache storage, IndexedDB databases, or browser-managed data.
+
+Do not delete unknown origin records automatically. Export important application data before clearing the origin.
+
+### 11. Heavy data belongs to IndexedDB
+
+NaviPlayer moves wallpaper, base metadata, metadata overrides, captions, lyrics, listening history, thumbnails, and persistence snapshots into IndexedDB. Small startup preferences remain in localStorage.
+
+If migration verification fails, the local record is retained. Storage Diagnostics should be used before manually clearing data.
+
+### 12. Persistence cannot recover already erased data
+
+The persistence mirror and migrations protect future saves and may reconnect legacy keys that still exist. They cannot recover records that the browser or an earlier build already deleted or overwrote.
+
+## Feature behavior
+
+### 13. Song-to-song leveling is real-time, not an offline LUFS scan
+
+Current leveling uses a real-time audio-processing stage to reduce large jumps between differently mastered tracks. It is not yet a complete pre-analyzed loudness database for the entire Library.
+
+Volume Boost above 100% can clip; extreme values near 800% can be dangerously loud. The warning is intentional.
+
+### 14. Transition fade is not simultaneous DJ crossfade
+
+Transition Fade lowers the outgoing item and begins the next item through NaviPlayer’s playback pipeline. It is not beat-matched simultaneous dual-deck mixing.
+
+### 15. Smart Queue does not rewrite manual order automatically
+
+Smart Queue rules affect Smart Shuffle and explicit applications of the rule set. A manually arranged Queue remains manual unless the user asks NaviPlayer to apply Smart Queue behavior.
+
+### 16. Playlists can contain mixed media
+
+NaviPlayer playlists may contain songs, videos, episodes, streams, or mixtures of those media. Importing or exporting an M3U does not guarantee that every referenced file is currently available or browser-playable.
+
+### 17. Linked playlist write-back requires permission
+
+Editable M3U/M3U8 files require a writable file handle. Permission can expire or return to a prompt state. Save, Reconnect, and Unlink are available through **More → Linked Playlist** when a linked playlist is open.
+
+### 18. Generated thumbnails are best effort
+
+Local video thumbnails are captured from an early frame and cached. Extraction can fail because of unsupported codecs, seek restrictions, corrupt files, or browser security behavior. NaviPlayer uses a fallback when extraction fails.
+
+### 19. Lyrics and online enrichment require internet access
+
+LRCLIB fetching requires a network connection and useful audio metadata. Matching is not guaranteed. Local LRC/text import remains available.
+
+### 20. Help and diagnostics describe the current modular build
+
+Archived builds do not have feature parity with v12.16.0. Do not use their UI or documentation as evidence of current behavior.
+
+## Accepted minor UI debt
+
+- Native browser file pickers, permission prompts, fullscreen surfaces, and some confirmation dialogs retain browser presentation.
+- Very narrow panes may truncate labels or switch to horizontal scrolling.
+- Floating tool windows use desktop windows in Desktop/Compact and full-height sheets in Mobile.
+- Automatic workspace transitions include hysteresis, so the exact width for entering a mode can differ slightly depending on the previous mode.
+- Some browser capability messages are advisory because MIME declarations may be incomplete or incorrect.
+
+## Current non-goals
+
+The following are not included in v12.16.0:
+
+- A bundled FFmpeg WebAssembly runtime
+- A full multi-source Musicolet-style mixer
+- Beat matching or DJ-grade dual playback
+- A maintained Portable branch. **NaviPlayer Pro Portable is discontinued; Portable v6 is an archived reference build with no future updates or feature-parity guarantees.**
+- Cloud sync or remote-account storage
+- A remote media server
+
+## Quick triage
+
+| Symptom | Likely cause | First check |
+|---|---|---|
+| Persistent folder or editable playlist controls unavailable | Sandboxed iframe or unsupported API | Test in a secure top-level Chromium tab |
+| Audio PiP refused | Document PiP unavailable or blocked by policy | Check browser support and iframe permissions |
+| A file appears but will not play | Unsupported container/codec | Open Library Health & Compatibility |
+| Likes/settings appear missing after moving the project | Different browser origin or profile | Check Storage Diagnostics and import a backup |
+| Lyrics or artwork cannot be fetched | Network or metadata mismatch | Verify internet access and tags |
+| Waveform is unavailable | Decode or cross-origin limitation | Read the Waveform status message |
+| Context width will not change | Mobile/collapsed Context or forced impractical layout | Restore Context and use Desktop/Compact/Browse/Playback |
+| Large cache scan appears slow | Deep cache serialization | Use the fast diagnostics summary instead |
+
+## Reporting a useful bug
+
+Include:
+
+- NaviPlayer version
+- Browser and version
+- Code preview versus normal tab
+- Workspace layout and Library layout
+- Exact actions that reproduce the problem
+- Screenshot or screen recording
+- Startup error details, if shown
+- Storage Diagnostics report for persistence issues
+- Whether the behavior survives a hard refresh
+

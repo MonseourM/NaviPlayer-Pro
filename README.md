@@ -1,254 +1,220 @@
 # NaviPlayer Pro
 
-**NaviPlayer Pro** is an offline-first music and video player that runs entirely in your browser.
+**Current release: v12.16.1**
 
-It was built as a browser-based media player inspired by apps like Spotify, YouTube Music, and classic desktop players, but designed to run locally with no accounts, no servers, and no tracking. Everything lives on your device. It is especially useful for people with a local music/video library who want a genuinely good-looking player with real features — playlists, lyrics, waveforms, an equalizer, and more — without handing their listening habits to a streaming company.
+NaviPlayer Pro is an offline-first browser media library for local audio and video. It combines a unified player, persistent library tools, Queue and playlist management, metadata editing, synced lyrics, captions, waveform seeking, video thumbnails, listening statistics, flexible workspace layouts, and extensive appearance controls without requiring an account or remote media server.
 
-The name follows the same spirit as its sibling project **NaviWriter**, which was itself inspired by the naming pattern of **Navidrome**. NaviPlayer is not related to Navidrome or Spotify or anyone else. I just liked the vibe. I will say this as many times as necessary--please don't sue me.
+The project began as a much smaller audio player called **Navidrome Lite** and was rebuilt into a modular audio-and-video application. The current source is the supported edition. Older monolithic builds are retired reference artifacts. **NaviPlayer Pro Portable is discontinued; Portable v6 is the final archived Portable build and is not maintained.**
+
+NaviPlayer Pro is not affiliated with Navidrome, Spotify, YouTube Music, Musicolet, or any other media product. Those products influenced individual interaction ideas, not ownership, branding, or source code.
+
+## Project status
+
+v12.16.1 is the current release candidate from the clean modular rebuild. It is considered **stable enough for normal use and backup**, with remaining browser-dependent limitations documented in `KNOWN_ISSUES.md`.
 
----
+The v12 rewrite replaced the former stacked-patch architecture with focused modules for state, storage, playback, Queue, playlists, persistent file access, metadata, lyrics and captions, appearance, workspace layouts, library health, audio enhancements, session restoration, and related tools.
 
-## What NaviPlayer Is
+## Highlights
 
-NaviPlayer is a local media application that runs in the browser.
+### Unified local media
 
-It includes tools for:
+- Audio and video in one Library, Queue, search system, and playlist model
+- Albums, artists, genres, shows, seasons, episodes, playlists, songs, videos, and streams
+- Folder-aware show and season detection
+- Continue Watching, watched state, resume position, and video thumbnails
+- Browser Media Session integration for operating-system and browser playback controls
 
-- Playing local audio and video files
-- Building and managing playlists (regular and smart/auto-updating)
-- Organizing a large library with filters, search, and collections
-- Viewing and seeking with a real audio waveform
-- Fetching synced lyrics and album art online
-- Loading subtitles/captions for videos
-- Tuning playback with an equalizer, speed control, crossfade, and volume normalization
-- Tracking listening stats, streaks, play counts, and history
-- Backing up and restoring everything in one file to move between devices
-- Deeply customizing the look with themes, aesthetics, wallpapers, and layouts
+### Library and navigation
 
-It is not a polished commercial product. It is a working local media suite built through a terribly unreasonable amount of iterative development, trial, error, stubbornness, and a suspicious amount of Claude Opus.
+- Fast indexed search with scoped All, Albums, Artists, Genres, Shows, and Playlists views
+- Icons and Rows presentations with independent 1–8 item/column settings
+- Per-presentation control over artwork, row height, metadata detail, title lines, and action visibility
+- Internal Back and Forward history for searches, roots, opened collections, filters, sorting, and seasons
+- Multi-select for individual media and whole albums, artists, genres, shows, and playlists
+- Select/Deselect Visible and Select/Deselect Collection
 
----
+### Queue and playback
 
-## Project Status
+- Queue reordering by artwork drag, Play Next, Follow Current, save, export, and playlist actions
+- Smart Shuffle and True Random modes
+- Repeat Off, All, and One
+- Resume last session without forced autoplay
+- Sleep timer and transition fade
+- Successful direct playback adds media to Queue once; failed automatic playback is not committed
 
-NaviPlayer Pro is currently considered **complete enough for release**.
+### Audio Enhancements
 
-This does **not** mean it is perfect.
+- Volume Boost from 100% to 800%, with persistent high-gain warnings
+- Song-to-song real-time leveling
+- Stereo balance
+- EQ presets and ten-band custom equalizer
+- Effective-gain indicator in the viewport-safe vertical volume popover
 
-You may encounter:
+### Import and metadata scanning
+- Import Scan Quality in **Library Tools → Import & Scanning**
+- **Quick** for fastest access, with possible omissions in embedded details and artwork
+- **Standard** as the recommended everyday mode for normal tags and artwork without expensive duration traversal
+- **Deep** for extended tags, trailing metadata, duration, and technical properties
+- Rescan Selected Items and Rescan Entire Library using the active scan quality
+- Quality-aware IndexedDB caching with parser-schema versioning and protection against metadata downgrades
+- Responsive scan controls, one active rescan at a time, and monotonic progress reporting
 
-- Bugs
-- UI quirks
-- Browser-specific issues (especially anything involving the file system, Picture-in-Picture, or fullscreen)
-- Layout weirdness at unusual window sizes
-- Features that depend on the internet (lyrics, album art)
-- Code that looks like it has been through several wars
+### Lyrics, captions, metadata, and waveform
 
-I do not currently plan to actively maintain NaviPlayer long-term. If you want to improve it, fork it, modify it, submit an issue, or open a pull request.
+- Local LRC/text import and LRCLIB fetching for audio
+- Synced lyric highlighting, click-to-seek, and automatic follow recovery
+- Local SRT/VTT captions for video
+- Editable display metadata with reset-to-original support
+- Metadata persistence keyed to stable media identity
+- Vertical waveform with seeking, zoom, Fit, and follow playback
+- Return to Current from inspected Metadata
 
-If someone wants to clean up the CSS or the ~70 stacked feature patches in `app.js`, please do. I will not stop you. I might even gracefully snatch it from you.
+### Playlists and files
 
----
+- NaviPlayer playlists containing audio, videos, episodes, streams, or mixed media
+- M3U/M3U8 import and export
+- Editable linked M3U files where browser file permissions allow
+- Persistent folder handles, reconnect, rescan, and forget workflows
+- Searchable Add to Playlist menus
+- Optional per-playlist playback settings
 
-## Credits and Development Notes
+### Workspace layouts
 
-NaviPlayer Pro was created and directed by me, a human.
+- Automatic layout selection by usable width
+- Desktop Standard
+- Desktop Browse
+- Desktop Playback
+- Compact
+- Mobile Library, Player, and Context destinations
+- TV Mode
+- Per-layout Context widths, collapsible panes, Library drawer, and persistent Workspace controls
+- Functional Context resize gutter with per-workspace saved widths
 
-Most of the initial code was generated with **Microsoft Copilot Thinking Mode**, but versions 13 and onward were generated and handled by **Claude Opus** via Copilot.
+### Appearance
 
-As I�m sure you know, I know very little about traditional software development. My role in the project was mostly just:
+- System, Light, and Dark color modes
+- Custom accent and presets
+- Multiple maintained aesthetics, including Default, Liquid Glass, Spotify Inspired, YouTube Music Inspired, Neon, Minimal, Classic Pro, Navidrome Lite, Brutalist, IDE, Retro Terminal, and Media Center
+- Wallpaper, blur, brightness, tint, branding visibility, and granular surface transparency
+- Comfortable, Roomy, and Cinema shell densities
+- Independent Library Layout module for Icons and Rows
 
-- Designing the features
-- Testing the app
-- Reviewing behavior
-- Asking for fixes
-- Directing the UI/UX
-- Breaking things
-- Unbreaking things
-- Fighting the same button for roughly a week
-- Saying "wait, can we also…" far too many times. Copilot can vouch for this, half of these features not even the typical person would use.
+### Tools and maintenance
 
-So if you open the code and find something strange, please have mercy.
+- Listening Statistics with ranked tables, listening time, streaks, days listened, and recent activity
+- Duplicate Finder with full relative paths and report export
+- Library Health & Compatibility with search, filters, severity, and Metadata links
+- Storage Diagnostics with IndexedDB and localStorage accounting
+- Data backup and restore
+- Searchable Keyboard Shortcuts and comprehensive Help
 
-The project works, but the internals are large. In particular:
+## Installation
 
-- `app.js` is very large and is a long chain of feature patches (each a self-contained module that layers on the last).
-- `styles.css` is smallish but contains many late-stage overrides from feature polish and responsive fixes.
-- The app is feature-first, not architecture-first.
+### Recommended: modular edition
 
-In other words: It works. But if something breaks a few weeks into using it don�t say I didn�t warn you.
+Keep the project structure intact and open `index.html` through a modern browser or local development server.
 
----
+```text
+index.html
+js/
+css/
+```
 
-## Download / Installation
+The modular source is authoritative and is the version intended for editing and maintenance.
 
-You can use NaviPlayer Pro in either of two ways:
+### Portable edition
 
-### Option 1: Single-file version
+**NaviPlayer Pro Portable is discontinued.** Portable v6 is the final archived Portable build. It remains available only as a reference artifact and receives no maintenance, compatibility fixes, feature updates, documentation parity, or support guarantees.
 
-Download:
+Use the modular edition for all current installations, development, bug reports, and future upgrades. Portable behavior or missing features should not be treated as evidence of a defect in the maintained modular edition.
 
-`NaviPlayer_Pro_Portable.html`
+## Quick start
 
-Then open it in a modern browser. Everything is bundled into that one file.
+1. Open NaviPlayer Pro in a Chromium-based browser.
+2. Use **Add** to load files, a folder, an editable playlist, a persistent folder, or an HLS URL.
+3. Select media to play it or add it to Queue.
+4. Use **Tools** for Appearance, Workspace Layout, Library Layout, Playback & Queue, Audio Enhancements, Library Health & Compatibility, Data & Maintenance, Help, and other modules.
+5. Export a backup before clearing browser data or moving to another preview origin.
 
-### Option 2: Split version (recommended for editing)
+## Storage and backups
 
-Download all three files and keep them **in the same folder**:
+NaviPlayer stores application data in browser storage. Small startup records use localStorage; heavyweight state such as base metadata, overrides, captions, lyrics, wallpaper, listening history, snapshots, and thumbnail/cache data uses IndexedDB.
 
-- `index.html`
-- `app.js`
-- `styles.css`
+Metadata scan results are stored persistently in IndexedDB for the current page origin. Unchanged files can reuse cached results identified by normalized path, file size, and modified timestamp. The cache records scan quality and parser schema so richer results are not overwritten by lower-quality rescans. Clearing parsed metadata or site data removes that reusable cache.
 
-Then open `index.html` in a browser.
+Persistent records may include:
 
-The split version is much friendlier if you plan to edit the code — your editor won't choke on one giant mashed-together file.
+- Settings, workspace layout, and Library layout
+- Playlists and linked playlist information
+- Likes and liked collections
+- Watch progress and watched state
+- Metadata overrides and base metadata
+- Captions and lyrics
+- Listening history and playback issues
+- Wallpaper and generated video thumbnails
+- Persistent folder and editable playlist handles, where supported
 
-Preferably use a Chromium-based browser such as:
+**Browser storage belongs to the page origin.** Changing from one preview origin to another, clearing site data, using private browsing, or changing browser profiles can make saved data unavailable. Export a backup before major updates or storage cleanup.
 
-- Chrome
-- Microsoft Edge
-- Brave
-- Vivaldi
+NaviPlayer does not copy the entire media Library into browser storage. Ordinary files remain in their original folders. Persistent folder access can reconnect them where the browser permits; otherwise, media must be reselected after reload.
 
-Other browsers work for most things, but a few features (Picture-in-Picture for audio, fullscreen, the floating mini-player) rely on newer browser APIs that are best supported in Chromium browsers, and are blocked entirely inside sandboxed editor previews.
+## Browser recommendations
 
----
+Chromium-based browsers provide the broadest support for NaviPlayer’s advanced APIs. Some features require a secure top-level tab and may be blocked inside sandboxed previews:
 
-## Quick Start
+- Persistent folder and writable playlist access
+- Document Picture-in-Picture for audio
+- Video Picture-in-Picture and fullscreen
+- Clipboard access
+- Some media and worker capabilities
 
-1. Open NaviPlayer Pro in a modern browser.
-2. Add music or video with **Menu → Library → Add Files** (or drag files onto the library, or use **Add Folder** for a whole tree).
-3. Click a track to play it.
-4. Build a playlist from **Menu → Playlists → New Playlist**.
-5. For a song, hit **Fetch synced lyrics** to pull timed lyrics online.
-6. Explore **Menu → Appearance** to make it yours.
-7. Back up regularly with **Menu → Data & Maintenance → Export EVERYTHING**.
+Unsupported features should display a direct status message rather than silently failing.
 
-Most importantly: export backups regularly.
+## Keyboard shortcuts
 
----
+Open **Tools → Keyboard Shortcuts** for the searchable current list. Common shortcuts include:
 
-## Important Backup Warning
+- `Space`: Play or pause
+- `Shift + Left/Right`: Previous or next
+- `S`: Shuffle
+- `R`: Repeat
+- `L`: Locate current media
+- `H`: Like or unlike current media
+- `/` or `F`: Focus Search
+- `Q`: Open Queue
+- `M`: Open Metadata
+- `T`: Open Tools
+- `D`: Cycle density
+- `Escape`: Close the active menu/tool, exit Multi-select, close a Library drawer, leave fullscreen, or exit TV Mode as appropriate
 
-NaviPlayer stores everything **except your actual media files** locally in the browser (playlists, likes, metadata edits, lyrics, play stats, settings, wallpaper, and so on).
+## Development architecture
 
-That means your data can be affected by:
+NaviPlayer Pro is intentionally modular. Major ownership areas include:
 
-- Clearing browser storage
-- Switching browsers
-- Browser privacy settings
-- School/work device restrictions
-- Local device issues
-- Browser crashes
-- Accidental deletion
+```text
+app.js                 startup orchestration
+state.js               shared application state and persistent settings
+storage.js             localStorage, IndexedDB, migrations, diagnostics
+library.js             indexing, search, grouping, collections
+playback.js            unified audio/video playback and Media Session
+queue.js               Queue mutation and synchronization
+playlists.js           internal playlists and M3U representation
+file-access.js         persistent folder handles
+playlist-files.js      editable playlist file handles and write-back
+metadata.js            metadata parsing and media construction
+metadata-overrides.js  editable display metadata
+captions-lyrics.js     captions, local lyrics, and LRCLIB storage
+appearance-layout.js   appearance and pane resizing
+ui.js                  rendering and event orchestration
+```
 
-Please back up regularly with **Export EVERYTHING** in Library Tools / Data & Maintenance.
+New features should integrate with the module that owns their state instead of wrapping foundational functions after startup.
 
-**Note on media:** your actual audio/video files are **never** stored by NaviPlayer (browsers don't allow it). A backup saves all your data *about* the library. When you move to a new device, import the backup and then re-add the same music files — everything (likes, playlists, lyrics, metadata) automatically relinks by filename.
+## Credits
 
-Recommended backup habits:
-
-- Export a backup before major changes
-- Keep a copy on an external drive
-- Keep a cloud copy
-- Export before clearing anything
-
----
-
-## Feature Overview
-
-### Playback
-
-- Unified audio + video engine
-- Play / pause / next / previous / seek
-- Shuffle and repeat (all / one / off)
-- Queue with drag-to-reorder, play-next, and "surprise me" random play
-- Gapless-ish playback (preloads the next track)
-- Keyboard shortcuts for everything (press **?** for the full list)
-- OS / lock-screen / Bluetooth media controls (MediaSession)
-- Continue Watching for unfinished videos
-- Resume your last session on reopen
-
-### Playback tuning (Menu → Playback Controls)
-
-- 5-band **Equalizer** with presets (Bass Boost, Vocal, Rock, Lo-fi, and more)
-- **Speed** control (0.25×–2×, pitch preserved)
-- **Crossfade** between tracks (and a quick fade on manual skip)
-- **Volume normalization** to even out loud and quiet tracks
-- **A-B loop** to repeat a segment
-- **Sleep timer** with an optional gentle 10-second fade
-
-### The viewer
-
-- Real **audio waveform** — click or drag to seek, zoom 1×–8×
-- **Synced lyrics** — fetch online (LRCLIB), click a line to jump, or load `.lrc` files
-- Focus modes: **Waveform only**, **Lyrics only**, or the full view
-- **Fullscreen** and **Picture-in-Picture** for video, plus a floating audio mini-player
-
-### Library & playlists
-
-- Fast search with **smart operators** (`artist:"..."`, `liked:true`, `duration:>3min`, etc.)
-- Filters: Browse, Media, Liked, Recently Added, Recently Played, Most Played
-- Collections (auto-grouped shows/seasons) and albums/artists/genres views
-- **Regular playlists** (create, rename, reorder, import/export `.m3u`)
-- **Smart playlists** — rule-based and auto-updating, with a "freeze" option
-- **Pin** and **color-code** playlists
-- Multi-select for batch actions
-- Compact single-row (iTunes-style) mode
-
-### Online enrichment (Library Tools)
-
-- **Fetch synced lyrics** from LRCLIB (free, no key)
-- **Fetch album art** from MusicBrainz + the Cover Art Archive
-- **Auto-tag** Unknown tracks from MusicBrainz
-- **Load a captions folder** that auto-matches `.srt`/`.vtt` to videos by filename
-
-### Stats & maintenance (Menu → Data & Maintenance)
-
-- **Listening Stats** — total time, top artists, top tracks, day streaks, text export
-- **Duplicate Finder**
-- **Export / Import EVERYTHING** in one file
-- Clear tools (playlists, library, watch data) in a clearly-marked Danger Zone
-
-### Make it yours (Menu → Appearance)
-
-- Light / dark
-- Layout density (Compact / Comfortable / Roomy / Cinema) and TV Mode
-- Theme presets + a **custom accent color** picker
-- **9 aesthetics**: Liquid Glass, Spotify-ish, YouTube Music-ish, Neon Glow, Minimal, Retro/Winamp, Newspaper/Brutalist, Vaporwave, Terminal Green (please don�t sue me)
-- **Wallpaper** backgrounds with blur / brightness / tint / position
-- A draggable, resizable Appearance panel
-
----
-
-## Keyboard Shortcuts
-
-Press **?** at any time for the full, searchable, tabbed list. A few highlights:
-
-- **Space** — play / pause
-- **← / →** — seek 5s
-- **Shift + ← / →** — previous / next track
-- **↑ / ↓** — volume
-- **1–9** — jump to 10%–90% of the track, **0** — restart
-- **L** — like, **S** — shuffle, **R** — repeat
-- **M** — mini-player
-- **/** — focus search
-- **?** — this help
-
----
-
-## A Note on Where Things Fetch From
-
-Lyrics, album art, and auto-tagging use free community services (**LRCLIB**, **MusicBrainz**, and the **Cover Art Archive**). These require an internet connection and work best with well-tagged files. Coverage is not 100% — niche or mistagged tracks may not be found. Everything else in NaviPlayer works fully offline.
-
----
+NaviPlayer Pro was conceived, directed, tested, and iteratively designed by oluwaferanmi.jeje, with implementation assistance from Microsoft Copilot. The application exists because of extensive hands-on QA, product decisions, screenshots, bug reports, and a frankly unreasonable refusal to accept mediocre media-player UI.
 
 ## License
 
-Find the license in the `LISCENSE` file I guess.
-
----
-
-Built with love, spite, and an enormous amount of iteration. Enjoy your music. 🎶
+See the project license file when included with the distribution.
 
